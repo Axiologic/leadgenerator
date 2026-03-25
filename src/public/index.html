@@ -8,65 +8,76 @@
 </head>
 <body>
     <header>
-        <h1>Lead Generator & Manager</h1>
+        <h1>Lead Generator</h1>
         <nav>
-            <button data-tab="discovery">Discovery</button>
-            <button data-tab="scraper">Recursive Scraper</button>
-            <button data-tab="leads">Lead Management</button>
+            <button data-tab="discovery" class="active">Discovery</button>
+            <button data-tab="scraper">Scraper</button>
+            <button data-tab="leads">Leads</button>
             <button data-tab="settings">Settings</button>
         </nav>
     </header>
-
-    <main id="content">
-        <!-- Content will be loaded here -->
-    </main>
+    <main id="content"></main>
 
     <template id="discovery-template">
         <section>
-            <h2>Discovery</h2>
+            <h2>Lead Discovery</h2>
             <div class="form-group">
-                <label for="discovery-topic">Topic:</label>
-                <input type="text" id="discovery-topic" placeholder="e.g., European Research Projects">
+                <label for="discovery-topic">Search Topic:</label>
+                <div class="input-with-btn">
+                    <input type="text" id="discovery-topic" placeholder="e.g., European AI Research Projects">
+                    <button id="start-discovery">Search</button>
+                    <button id="suggest-topics" class="btn-secondary">Suggest</button>
+                </div>
             </div>
-            <button id="start-discovery">Start Discovery</button>
-            <div id="discovery-results" class="results"></div>
+            <div id="topic-suggestions" class="suggestions" style="display:none"></div>
+            <div id="search-history" class="suggestions" style="display:none"></div>
+            <div id="discovery-results" class="results-area"></div>
         </section>
     </template>
 
     <template id="scraper-template">
         <section>
             <h2>Recursive Scraper</h2>
+            <p class="muted">Scrapes pages recursively, extracts leads. Supports HTML, PDF, and DOCX.</p>
             <div class="form-group">
                 <label for="scraper-url">Starting URL:</label>
                 <input type="url" id="scraper-url" placeholder="https://example.com">
             </div>
+            <div id="scraper-history" class="suggestions" style="display:none"></div>
             <div class="form-group">
                 <label for="scraper-depth">Depth:</label>
                 <input type="number" id="scraper-depth" value="2" min="1" max="5">
             </div>
-            <button id="start-scraper">Start Recursive Scraper</button>
-            <div id="scraper-results" class="results"></div>
+            <div class="flex-row">
+                <button id="start-scraper">Start Scraper</button>
+                <button id="continue-scraper" class="btn-secondary" style="display:none">Continue →</button>
+                <span id="scraper-status" class="muted"></span>
+            </div>
+            <div id="scraper-results" class="results-area"></div>
         </section>
     </template>
 
     <template id="leads-template">
         <section>
             <h2>Lead Management</h2>
-            <div class="table-container">
-                <table id="leads-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Organization</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th>Score</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <div class="leads-toolbar">
+                <div class="leads-filter">
+                    <label>Filter:</label>
+                    <select id="filter-status">
+                        <option value="">All</option>
+                        <option value="New">New</option>
+                        <option value="Contacted">Contacted</option>
+                        <option value="Not Interested">Not Interested</option>
+                    </select>
+                    <select id="filter-type">
+                        <option value="">All Types</option>
+                        <option value="person">Person</option>
+                        <option value="organization">Organization</option>
+                    </select>
+                </div>
+                <span id="leads-count" class="muted"></span>
             </div>
+            <div id="leads-list"></div>
         </section>
     </template>
 
@@ -75,19 +86,31 @@
             <h2>Settings</h2>
             <div class="settings-group">
                 <h3>LLM Configuration</h3>
-                <div id="llm-settings">
-                    <!-- LLM settings will be loaded here -->
-                </div>
+                <div id="llm-settings"></div>
             </div>
             <div class="settings-group">
                 <h3>Scoring Keywords</h3>
-                <div id="scoring-settings">
-                    <!-- Scoring settings will be loaded here -->
+                <p class="muted">Keywords and their scores used for lead prioritization.</p>
+                <div id="scoring-settings"></div>
+                <div class="input-with-btn" style="margin-top:0.5rem">
+                    <input type="text" id="new-keyword" placeholder="keyword">
+                    <input type="number" id="new-keyword-score" placeholder="score" value="10" style="width:80px">
+                    <button id="add-keyword" class="btn-secondary">Add</button>
                 </div>
             </div>
-            <button id="save-settings">Save Settings</button>
         </section>
     </template>
+
+    <!-- Lead detail modal -->
+    <div id="lead-modal" class="modal" style="display:none">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button class="modal-close" onclick="document.getElementById('lead-modal').style.display='none'">&times;</button>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
 
     <script src="app.js" type="module"></script>
 </body>
