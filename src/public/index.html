@@ -12,6 +12,7 @@
         <nav>
             <button data-tab="discovery" class="active">Discovery</button>
             <button data-tab="projects">Projects</button>
+            <button data-tab="investors">Investors</button>
             <button data-tab="scraper">Scraper</button>
             <button data-tab="leads">Leads</button>
             <button data-tab="settings">Settings</button>
@@ -44,6 +45,14 @@
             <p class="muted">Collect research projects, consortiums, associations, and industry groups. Then extract leads (people & companies) from their partner pages.</p>
             <div id="projects-list"></div>
             <div id="project-leads-area" class="results-area" style="margin-top:1rem"></div>
+        </section>
+    </template>
+
+    <template id="investors-template">
+        <section>
+            <h2>Investors & Funding</h2>
+            <p class="muted">Organizations that invest in or fund projects in your area. Saved from Discovery results.</p>
+            <div id="investors-list"></div>
         </section>
     </template>
 
@@ -85,6 +94,7 @@
                         <option value="">All Types</option>
                         <option value="person">Person</option>
                         <option value="organization">Organization</option>
+                        <option value="investor">Investor</option>
                     </select>
                 </div>
                 <div class="flex-row">

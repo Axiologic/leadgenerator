@@ -38,12 +38,24 @@ function addProject(item) {
     return true;
 }
 
+function getInvestors() { try { return JSON.parse(localStorage.getItem('investors') || '[]'); } catch { return []; } }
+function saveInvestors(list) { localStorage.setItem('investors', JSON.stringify(list)); }
+function addInvestor(item) {
+    const list = getInvestors();
+    if (list.some(i => i.name?.toLowerCase() === item.name?.toLowerCase())) return false;
+    list.push({ ...item, type: 'investor', addedAt: new Date().toISOString() });
+    saveInvestors(list);
+    return true;
+}
+
 function renderLeadCard(item, container, { source = 'discovery', showReject = true, showAdd = true } = {}) {
     const card = document.createElement('div');
     card.className = 'discovery-card';
     const isProject = item.type === 'project' || item.type === 'consortium' || item.type === 'association';
+    const isInvestor = item.type === 'investor';
     const isPerson = item.type === 'person';
     const badge = isPerson ? '<span class="badge badge-person">Person</span>'
+        : isInvestor ? '<span class="badge badge-investor">Investor</span>'
         : isProject ? '<span class="badge badge-project">Project</span>'
         : '<span class="badge badge-org">Organization</span>';
     let links = '';
@@ -54,20 +66,28 @@ function renderLeadCard(item, container, { source = 'discovery', showReject = tr
         if (item.website) links += `<a href="${item.website}" target="_blank" rel="noopener">Website ↗</a>`;
         if (item.contactUrl) links += `<a href="${item.contactUrl}" target="_blank" rel="noopener">Contact ↗</a>`;
     }
-    const projectBtn = (isProject || (!isPerson && item.website)) ? '<button class="btn-project">📁 To Projects</button>' : '';
+    const isOrg = !isPerson && !isProject;
+    const projectBtn = (isProject || isOrg) && item.website ? '<button class="btn-project">📁 Project</button>' : '';
+    const investorBtn = isOrg && !isInvestor ? '<button class="btn-investor">💰 Investor</button>' : '';
     card.innerHTML = `
         <div class="card-header">${badge}<strong>${item.name || 'Unknown'}</strong></div>
         <div class="card-links">${links || '<span class="muted">No links</span>'}</div>
         <div class="card-actions">
             ${showReject ? '<button class="btn-reject">Reject</button>' : ''}
             ${projectBtn}
+            ${investorBtn}
             ${showAdd ? '<button class="btn-add">Add to Leads</button>' : ''}
         </div>`;
     if (showReject) card.querySelector('.btn-reject').onclick = () => card.remove();
     const projBtn = card.querySelector('.btn-project');
     if (projBtn) projBtn.onclick = () => {
-        if (addProject(item)) { projBtn.textContent = '✅ Saved'; projBtn.disabled = true; }
-        else { projBtn.textContent = 'Already saved'; projBtn.disabled = true; }
+        if (addProject(item)) { projBtn.textContent = '✅'; projBtn.disabled = true; }
+        else { projBtn.textContent = 'Exists'; projBtn.disabled = true; }
+    };
+    const invBtn = card.querySelector('.btn-investor');
+    if (invBtn) invBtn.onclick = () => {
+        if (addInvestor(item)) { invBtn.textContent = '✅'; invBtn.disabled = true; }
+        else { invBtn.textContent = 'Exists'; invBtn.disabled = true; }
     };
     if (showAdd) card.querySelector('.btn-add').onclick = async () => {
         const lead = { name: item.name, type: item.type || 'organization', organization: isPerson ? '' : item.name, email: item.email || '', linkedin: item.linkedin || '', website: item.website || '', contactUrl: item.contactUrl || '', source, status: 'New' };
@@ -254,6 +274,66 @@ function initDiscovery() {
         }
         finally { suggestBtn.disabled = false; suggestBtn.textContent = 'Suggest'; }
     };
+}
+
+// --- Investors tab ---
+function initInvestors() {
+    const listDiv = document.getElementById('investors-list');
+    const investors = getInvestors();
+
+    if (!investors.length) {
+        listDiv.innerHTML = '<p class="muted">No investors saved yet. Use Discovery to find organizations and click "💰 Investor".</p>';
+        return;
+    }
+
+    listDiv.innerHTML = investors.map((inv, i) => `
+        <div class="project-row">
+            <div class="project-info">
+                <span class="badge badge-investor">Investor</span>
+                <strong>${inv.name}</strong>
+                ${inv.website ? `<a href="${inv.website}" target="_blank" class="muted">↗</a>` : ''}
+                ${inv.investsIn ? `<span class="muted" style="font-size:0.8rem">— ${inv.investsIn}</span>` : ''}
+            </div>
+            <div class="project-actions">
+                <button class="btn-secondary btn-enrich-inv" data-idx="${i}">🔍 Enrich</button>
+                <button class="btn-add btn-add-inv" data-idx="${i}" style="font-size:0.8rem;padding:0.3rem 0.7rem">Add to Leads</button>
+                <button class="btn-x" data-idx="${i}">×</button>
+            </div>
+        </div>`).join('');
+
+    listDiv.querySelectorAll('.btn-enrich-inv').forEach(btn => {
+        btn.onclick = async () => {
+            const inv = investors[btn.dataset.idx];
+            const url = inv.website || inv.contactUrl;
+            if (!url) return;
+            btn.disabled = true; btn.textContent = '⏳...';
+            try {
+                const data = await postJsonOrThrow('/api/scrape', { url, depth: 0 });
+                // Use the page content to ask LLM about investment focus
+                const enrichRes = await postJsonOrThrow('/api/discovery', { topic: `What does ${inv.name} invest in? What sectors, stages, and types of companies? Based on: ${url}` });
+                if (Array.isArray(enrichRes) && enrichRes.length) {
+                    inv.investsIn = enrichRes.map(r => r.name || r).join(', ').substring(0, 200);
+                    saveInvestors(investors);
+                    initInvestors();
+                }
+            } catch {}
+            finally { btn.disabled = false; btn.textContent = '🔍 Enrich'; }
+        };
+    });
+
+    listDiv.querySelectorAll('.btn-add-inv').forEach(btn => {
+        btn.onclick = async () => {
+            const inv = investors[btn.dataset.idx];
+            try {
+                await postJsonOrThrow('/api/leads', { name: inv.name, type: 'investor', organization: inv.name, website: inv.website || '', contactUrl: inv.contactUrl || '', source: 'investor list', status: 'New', notes: inv.investsIn ? `Invests in: ${inv.investsIn}` : '' });
+                btn.textContent = '✅'; btn.disabled = true;
+            } catch (err) { btn.textContent = '❌'; }
+        };
+    });
+
+    listDiv.querySelectorAll('.btn-x').forEach(btn => {
+        btn.onclick = () => { investors.splice(btn.dataset.idx, 1); saveInvestors(investors); initInvestors(); };
+    });
 }
 
 // --- Scraper history ---
@@ -455,7 +535,9 @@ function renderLeadsList() {
 
     container.innerHTML = filtered.map(lead => {
         const isPerson = lead.type === 'person';
-        const badge = isPerson ? '<span class="badge badge-person">Person</span>' : '<span class="badge badge-org">Org</span>';
+        const badge = isPerson ? '<span class="badge badge-person">Person</span>'
+            : lead.type === 'investor' ? '<span class="badge badge-investor">Investor</span>'
+            : '<span class="badge badge-org">Org</span>';
         const statusClass = lead.status === 'Contacted' ? 'status-contacted' : lead.status === 'Not Interested' ? 'status-rejected' : 'status-new';
         const link = isPerson
             ? (lead.linkedin ? `<a href="${lead.linkedin}" target="_blank">LinkedIn ↗</a>` : (lead.email ? `<a href="mailto:${lead.email}">${lead.email}</a>` : ''))
@@ -515,6 +597,9 @@ function initLeads() {
             const data = JSON.parse(text);
             const res = await postJsonOrThrow('/api/leads/import', data);
             importStatus.innerHTML = `<span class="status-ok">✅ Added ${res.added}, updated ${res.updated} (total: ${res.total})</span>`;
+            // Reset filter to All so imported leads are visible
+            const statusFilter = document.getElementById('filter-status');
+            if (statusFilter) statusFilter.value = '';
             loadLeads();
         } catch (err) { importStatus.innerHTML = `<span class="error-msg">❌ ${err.message}</span>`; }
         importFile.value = '';
@@ -662,6 +747,7 @@ function renderTab(tabId) {
     tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
     if (tabId === 'discovery') initDiscovery();
     if (tabId === 'projects') initProjects();
+    if (tabId === 'investors') initInvestors();
     if (tabId === 'scraper') initScraper();
     if (tabId === 'leads') initLeads();
     if (tabId === 'settings') initSettings();
