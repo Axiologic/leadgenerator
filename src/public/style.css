@@ -107,3 +107,21 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 .save-toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #2e7d32; color: #fff; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; }
 .save-toast.visible { opacity: 1; }
+
+.ideas-panel { padding: 0.75rem; background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 0.4rem; max-height: 300px; overflow-y: auto; }
+
+.score-badge { display: inline-block; background: #e3f2fd; color: #1565c0; font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 700; margin-left: 0.3rem; }
+.key-facts { margin: 0.3rem 0 0 1rem; padding: 0; font-size: 0.85rem; }
+.key-facts li { margin-bottom: 0.2rem; }
+.contact-msg { background: #f1f3f5; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; margin-top: 0.3rem; white-space: pre-wrap; }
+
+.badge-project { background: #fff3e0; color: #e65100; }
+.project-row { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.35rem; background: #fff; }
+.project-info { display: flex; align-items: center; gap: 0.5rem; }
+.project-actions { display: flex; gap: 0.4rem; }
+.btn-project { background: #ff9800; color: #fff; padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+.btn-project:hover { background: #f57c00; }
+
+.lead-quick { min-width: 30px; }
+.btn-not-interested { background: none; border: 1px solid var(--border); color: var(--secondary); padding: 0.2rem 0.5rem; font-size: 0.85rem; border-radius: 3px; cursor: pointer; }
+.btn-not-interested:hover { background: #fce4ec; color: var(--danger); border-color: var(--danger); }

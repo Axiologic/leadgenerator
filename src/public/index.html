@@ -11,6 +11,7 @@
         <h1>Lead Generator</h1>
         <nav>
             <button data-tab="discovery" class="active">Discovery</button>
+            <button data-tab="projects">Projects</button>
             <button data-tab="scraper">Scraper</button>
             <button data-tab="leads">Leads</button>
             <button data-tab="settings">Settings</button>
@@ -27,11 +28,22 @@
                     <input type="text" id="discovery-topic" placeholder="e.g., European AI Research Projects">
                     <button id="start-discovery">Search</button>
                     <button id="suggest-topics" class="btn-secondary">Suggest</button>
+                    <button id="ideas-btn" class="btn-secondary">💡 Ideas</button>
                 </div>
             </div>
-            <div id="topic-suggestions" class="suggestions" style="display:none"></div>
             <div id="search-history" class="suggestions" style="display:none"></div>
+            <div id="topic-suggestions" class="suggestions" style="display:none"></div>
+            <div id="ideas-panel" class="ideas-panel" style="display:none"></div>
             <div id="discovery-results" class="results-area"></div>
+        </section>
+    </template>
+
+    <template id="projects-template">
+        <section>
+            <h2>Projects & Consortiums</h2>
+            <p class="muted">Collect research projects, consortiums, associations, and industry groups. Then extract leads (people & companies) from their partner pages.</p>
+            <div id="projects-list"></div>
+            <div id="project-leads-area" class="results-area" style="margin-top:1rem"></div>
         </section>
     </template>
 
@@ -75,8 +87,14 @@
                         <option value="organization">Organization</option>
                     </select>
                 </div>
-                <span id="leads-count" class="muted"></span>
+                <div class="flex-row">
+                    <span id="leads-count" class="muted"></span>
+                    <button id="export-leads-btn" class="btn-secondary" style="font-size:0.8rem;padding:0.3rem 0.7rem">Export</button>
+                    <button id="import-leads-btn" class="btn-secondary" style="font-size:0.8rem;padding:0.3rem 0.7rem">Import</button>
+                    <input type="file" id="import-leads-file" accept=".json" style="display:none">
+                </div>
             </div>
+            <div id="import-status"></div>
             <div id="leads-list"></div>
         </section>
     </template>
@@ -98,10 +116,22 @@
                     <button id="add-keyword" class="btn-secondary">Add</button>
                 </div>
             </div>
+            <div class="settings-group">
+                <h3>Contact Template</h3>
+                <p class="muted">Describe your offer and contact intention. This is used to score leads and generate personalized messages.</p>
+                <textarea id="contact-template" rows="6" placeholder="Example: We are a research automation company specializing in AI-powered literature review and knowledge extraction. We help EU project consortiums automate their research workflows. We're looking for partners and coordinators for upcoming Horizon Europe calls."></textarea>
+            </div>
+            <div class="settings-group">
+                <h3>Password</h3>
+                <div class="input-with-btn">
+                    <input type="password" id="current-password" placeholder="Current password" style="width:auto">
+                    <input type="password" id="new-password" placeholder="New password" style="width:auto">
+                    <button id="change-password-btn" class="btn-secondary">Change</button>
+                </div>
+                <span id="password-status" class="muted"></span>
+            </div>
         </section>
     </template>
-
-    <!-- Lead detail modal -->
     <div id="lead-modal" class="modal" style="display:none">
         <div class="modal-content">
             <div class="modal-header">

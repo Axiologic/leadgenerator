@@ -9,7 +9,7 @@ const FILES = {
 const DEFAULT_CONFIG = {
     passwordHash: null,
     scoring: { keywords: { "innovation": 10, "research": 5, "eu": 15 } },
-    tasks: { discovery: { tier: 'fast' }, extraction: { tier: 'fast' }, scoring: { tier: 'fast' }, suggest: { tier: 'fast' } }
+    tasks: { discovery: { tier: 'fast' }, suggest: { tier: 'fast' }, extraction: { tier: 'fast' }, parse: { tier: 'fast' }, scoring: { tier: 'fast' } }
 };
 
 async function ensureDir() { try { await fs.access(DATA_DIR); } catch { await fs.mkdir(DATA_DIR, { recursive: true }); } }

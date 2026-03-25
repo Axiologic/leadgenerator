@@ -1,11 +1,14 @@
 {
   "name": "leadgenerator",
   "version": "1.0.0",
-  "description": "Lightweight, dependency-free Lead Generator and Manager",
+  "description": "Lightweight, zero-dependency Lead Generator and Manager powered by LLMs",
   "main": "src/server.mjs",
   "type": "module",
   "scripts": {
-    "start": "node src/server.mjs"
+    "start": "node src/server.mjs",
+    "test": "node tests/test-parsing.mjs && node tests/test-pipeline.mjs && node tests/test-extraction.mjs",
+    "test:unit": "node tests/test-parsing.mjs",
+    "postinstall": "mkdir -p node_modules && cd node_modules && (test -d achillesAgentLib || git clone https://github.com/OutfinityResearch/achillesAgentLib.git)"
   },
   "keywords": [],
   "author": "",
