@@ -1,0 +1,13 @@
+{
+  "name": "leadgenerator",
+  "version": "1.0.0",
+  "description": "Lightweight, dependency-free Lead Generator and Manager",
+  "main": "src/server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

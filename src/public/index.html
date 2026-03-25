@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Generator & Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Lead Generator & Manager</h1>
+        <nav>
+            <button data-tab="discovery">Discovery</button>
+            <button data-tab="scraper">Recursive Scraper</button>
+            <button data-tab="leads">Lead Management</button>
+            <button data-tab="settings">Settings</button>
+        </nav>
+    </header>
+
+    <main id="content">
+        <!-- Content will be loaded here -->
+    </main>
+
+    <template id="discovery-template">
+        <section>
+            <h2>Discovery</h2>
+            <div class="form-group">
+                <label for="discovery-topic">Topic:</label>
+                <input type="text" id="discovery-topic" placeholder="e.g., European Research Projects">
+            </div>
+            <button id="start-discovery">Start Discovery</button>
+            <div id="discovery-results" class="results"></div>
+        </section>
+    </template>
+
+    <template id="scraper-template">
+        <section>
+            <h2>Recursive Scraper</h2>
+            <div class="form-group">
+                <label for="scraper-url">Starting URL:</label>
+                <input type="url" id="scraper-url" placeholder="https://example.com">
+            </div>
+            <div class="form-group">
+                <label for="scraper-depth">Depth:</label>
+                <input type="number" id="scraper-depth" value="2" min="1" max="5">
+            </div>
+            <button id="start-scraper">Start Recursive Scraper</button>
+            <div id="scraper-results" class="results"></div>
+        </section>
+    </template>
+
+    <template id="leads-template">
+        <section>
+            <h2>Lead Management</h2>
+            <div class="table-container">
+                <table id="leads-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Organization</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Score</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </template>
+
+    <template id="settings-template">
+        <section>
+            <h2>Settings</h2>
+            <div class="settings-group">
+                <h3>LLM Configuration</h3>
+                <div id="llm-settings">
+                    <!-- LLM settings will be loaded here -->
+                </div>
+            </div>
+            <div class="settings-group">
+                <h3>Scoring Keywords</h3>
+                <div id="scoring-settings">
+                    <!-- Scoring settings will be loaded here -->
+                </div>
+            </div>
+            <button id="save-settings">Save Settings</button>
+        </section>
+    </template>
+
+    <script src="app.js" type="module"></script>
+</body>
+</html>
