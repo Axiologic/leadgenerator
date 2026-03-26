@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
 import { Storage } from './storage.mjs';
-import { listModelsFromCache } from 'achillesAgentLib/utils/LLMClient.mjs';
+import { listModelsFromCache } from './agentLib.mjs';
 import { MarketingAgent } from './marketingAgent.mjs';
 
 const PORT = 3000;

@@ -5,7 +5,7 @@
  * 1. Primary model (search/instruct) generates raw output
  * 2. If raw output isn't valid JSON, parse model structures it
  */
-import { LLMAgent } from 'achillesAgentLib/LLMAgents';
+import { LLMAgent } from './agentLib.mjs';
 
 /**
  * Extract a JSON array from an LLM response string.
