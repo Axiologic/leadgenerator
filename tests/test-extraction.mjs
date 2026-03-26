@@ -12,8 +12,8 @@ async function test(name, fn) {
 
 const config = {
     tasks: {
-        extraction: { model: 'copilot-gpt-4o' },
-        parse: { model: 'copilot-gpt-4.1' },
+        extraction: { model: 'axl/copilot/gpt-4o' },
+        parse: { model: 'axl/copilot/gpt-4.1' },
     }
 };
 

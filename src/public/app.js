@@ -615,15 +615,15 @@ async function loadSettings() {
     const modelsRes = await apiFetch('/api/models');
     if (!modelsRes.ok) return;
     const models = await modelsRes.json();
-    const SEARCH_MODELS = /search|tavily|duckduckgo|exa-/i;
-    const opts = [
-        '<option value="">Default (fast tier)</option>',
-        '<option value="fast">fast (tier)</option>',
-        '<option value="deep">deep (tier)</option>',
-        ...models.fast.filter(m => !SEARCH_MODELS.test(m.name)).map(m => `<option value="${m.name}">${m.name} (fast)</option>`),
-        ...models.deep.filter(m => !SEARCH_MODELS.test(m.name)).map(m => `<option value="${m.name}">${m.name} (deep)</option>`),
-        ...models.fast.filter(m => SEARCH_MODELS.test(m.name)).map(m => `<option value="${m.name}">${m.name} (search)</option>`),
-    ].join('');
+    const allModels = [...models.fast || [], ...models.deep || []]
+        .filter(m => m.tags && m.tags.length > 0);
+    function modelLabel(m) {
+        const tags = m.tags.join(', ');
+        if (m.isFree) return `${m.name} (${tags} · free)`;
+        if (m.billingType === 'subscription') return `${m.name} (${tags} · subscription)`;
+        return `${m.name} (${tags} · api key)`;
+    }
+    const opts = allModels.map(m => `<option value="${m.name}">${modelLabel(m)}</option>`).join('');
 
     const llm = document.getElementById('llm-settings');
     if (llm) {
@@ -635,15 +635,17 @@ async function loadSettings() {
             <span id="test-status-${t}" class="test-status"></span></div></div>`).join('');
         tasks.forEach(t => {
             const tc = state.config.tasks?.[t] || {};
-            const val = tc.model || tc.tier || '';
+            const val = tc.model || '';
             const sel = document.getElementById(`config-${t}`);
             if (sel) {
-                sel.value = val;
-                // If saved value isn't in options, add it so it shows
-                if (sel.value !== val && val) {
-                    sel.insertAdjacentHTML('beforeend', `<option value="${val}" selected>${val} (saved)</option>`);
+                if (val) {
                     sel.value = val;
+                    if (sel.value !== val) {
+                        sel.insertAdjacentHTML('beforeend', `<option value="${val}" selected>${val} (saved)</option>`);
+                        sel.value = val;
+                    }
                 }
+                // If nothing saved or value didn't match, keep first option selected
             }
             document.querySelector(`.btn-test[data-task="${t}"]`).onclick = () => testModel(t);
             sel.onchange = () => autoSaveSettings(`${t} → ${sel.value || 'default'}`);
@@ -706,7 +708,7 @@ async function testModel(task) {
     const span = document.getElementById(`test-status-${task}`);
     if (!val) { span.textContent = '❌ Select model'; return; }
     span.textContent = '⏳'; span.className = 'test-status testing';
-    const payload = (val === 'fast' || val === 'deep') ? { tier: val } : { model: val };
+    const payload = val ? { model: val } : { tier: 'fast' };
     try {
         const res = await postJson('/api/test-model', payload);
         const d = await res.json();
@@ -728,7 +730,7 @@ async function autoSaveSettings(what) {
     const tasks = {};
     ['discovery', 'suggest', 'extraction', 'parse', 'scoring'].forEach(t => {
         const val = document.getElementById(`config-${t}`)?.value || '';
-        tasks[t] = (val === 'fast' || val === 'deep' || val === '') ? { tier: val || 'fast' } : { model: val };
+        tasks[t] = val ? { model: val } : { tier: 'fast' };
     });
     await postJson('/api/config', { tasks, scoring: state.config.scoring });
     showSaveToast(what || 'Settings saved');

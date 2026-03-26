@@ -23,8 +23,8 @@ const config = {
 console.log('=== Pipeline integration tests ===\n');
 
 // Test 1: instruct model returns JSON directly (no parse step needed)
-await test('instruct model (copilot-gpt-4.1) returns valid JSON for discovery', async () => {
-    const { agent, opts } = createAgent('discovery', { model: 'copilot-gpt-4.1' });
+await test('instruct model (axl/copilot/gpt-4.1) returns valid JSON for discovery', async () => {
+    const { agent, opts } = createAgent('discovery', { model: 'axl/copilot/gpt-4.1' });
     const raw = await callLLM(agent, `Identify 3 organizations involved in "European AI research".
 Return ONLY a JSON array:
 [{"type":"organization","name":"...","website":"...","contactUrl":"..."}]`, opts);
@@ -38,8 +38,8 @@ Return ONLY a JSON array:
 });
 
 // Test 2: search model returns non-JSON, parse model structures it
-await test('exa-search → copilot-gpt-4.1 parse pipeline', async () => {
-    const { agent, opts } = createAgent('search', { model: 'exa-search' });
+await test('axl/search/exa-search → axl/copilot/gpt-4.1 parse pipeline', async () => {
+    const { agent, opts } = createAgent('search', { model: 'axl/search/exa-search' });
     const raw = await callLLM(agent, 'Find organizations involved in European AI research projects', opts);
     console.log(`    Search raw (${raw.length} chars): ${raw.substring(0, 100)}...`);
 
@@ -48,7 +48,7 @@ await test('exa-search → copilot-gpt-4.1 parse pipeline', async () => {
     console.log(`    Direct parse: ${directParse ? 'succeeded (unexpected)' : 'null (expected)'}`);
 
     // Now parse with instruct model
-    const { agent: pAgent, opts: pOpts } = createAgent('parse', { model: 'copilot-gpt-4.1' });
+    const { agent: pAgent, opts: pOpts } = createAgent('parse', { model: 'axl/copilot/gpt-4.1' });
     const parsed = await parseWithLLM(raw, pAgent, pOpts, LEADS_SCHEMA);
     if (!Array.isArray(parsed)) throw new Error('Not an array');
     if (parsed.length === 0) throw new Error('Empty array');
@@ -61,8 +61,8 @@ await test('exa-search → copilot-gpt-4.1 parse pipeline', async () => {
 await test('runPipeline with search model auto-falls back to parse', async () => {
     const pipeConfig = {
         tasks: {
-            discovery: { model: 'exa-search' },
-            parse: { model: 'copilot-gpt-4.1' },
+            discovery: { model: 'axl/search/exa-search' },
+            parse: { model: 'axl/copilot/gpt-4.1' },
         }
     };
     const results = await runPipeline(pipeConfig, 'discovery',
@@ -79,8 +79,8 @@ await test('runPipeline with search model auto-falls back to parse', async () =>
 await test('runPipeline with instruct model returns directly', async () => {
     const pipeConfig = {
         tasks: {
-            suggest: { model: 'copilot-gpt-4.1' },
-            parse: { model: 'copilot-gpt-4.1' },
+            suggest: { model: 'axl/copilot/gpt-4.1' },
+            parse: { model: 'axl/copilot/gpt-4.1' },
         }
     };
     const results = await runPipeline(pipeConfig, 'suggest',
@@ -96,8 +96,8 @@ await test('runPipeline with instruct model returns directly', async () => {
 await test('validation filters Unknown and placeholder entries', async () => {
     const pipeConfig = {
         tasks: {
-            discovery: { model: 'copilot-gpt-4.1' },
-            parse: { model: 'copilot-gpt-4.1' },
+            discovery: { model: 'axl/copilot/gpt-4.1' },
+            parse: { model: 'axl/copilot/gpt-4.1' },
         }
     };
     // This should return real names, not "Unknown" or "..."
